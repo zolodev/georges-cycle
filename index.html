@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>George's Cycle — Periods to Make Money</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@300;400;600&display=swap');
+
+:root {
+–bg: #1a1008;
+–parchment: #f5ead0;
+–parchment-dark: #e8d5a8;
+–ink: #1a1008;
+–ink-light: #3d2b10;
+–gold: #c8901a;
+–gold-light: #e8b840;
+–red: #8b1a1a;
+–green: #1a5c2a;
+–blue: #1a2e5c;
+–panel: #12100a;
+–border: #3d2b10;
+
+–row-a-bg: rgba(139,26,26,0.08);
+–row-b-bg: rgba(26,46,92,0.08);
+–row-c-bg: rgba(26,92,42,0.08);
+
+–row-a-color: #8b1a1a;
+–row-b-color: #1a2e5c;
+–row-c-color: #1a5c2a;
+
+–tooth-stroke: #2a1a06;
+–now-color: #c8901a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+height: 100%;
+background: var(–bg);
+color: var(–ink);
+font-family: ‘Libre Baskerville’, Georgia, serif;
+overflow-x: hidden;
+}
+
+/* ── NAV ── */
+#nav {
+position: fixed;
+top: 0; left: 0; right: 0;
+z-index: 100;
+background: var(–ink);
+border-bottom: 2px solid var(–gold);
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 20px;
+height: 52px;
+}
+
+#nav .logo {
+font-family: ‘Libre Baskerville’, serif;
+font-style: italic;
+font-size: 1rem;
+color: var(–gold-light);
+letter-spacing: 0.02em;
+}
+
+#nav .nav-links {
+display: flex;
+gap: 4px;
+}
+
+#nav button {
+background: none;
+border: 1px solid transparent;
+color: #a89060;
+font-family: ‘Source Code Pro’, monospace;
+font-size: 0.72rem;
+letter-spacing: 0.08em;
+text-transform: uppercase;
+padding: 6px 14px;
+border-radius: 2px;
+cursor: pointer;
+transition: all 0.2s;
+}
+#nav button:hover,
+#nav button.active {
+color: var(–gold-light);
+border-color: var(–gold);
+background: rgba(200,144,26,0.1);
+}
+
+/* ── PAGES ── */
+.page { display: none; padding-top: 52px; min-height: 100vh; }
+.page.active { display: block; }
+
+/* ══════════════════════════════════════
+CHART PAGE
+══════════════════════════════════════ */
+#chart-page {
+background: var(–parchment);
+background-image:
+url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘300’ height=‘300’%3E%3Cfilter id=‘n’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.65’ numOctaves=‘3’ stitchTiles=‘stitch’/%3E%3CfeColorMatrix type=‘saturate’ values=‘0’/%3E%3C/filter%3E%3Crect width=‘300’ height=‘300’ filter=‘url(%23n)’ opacity=‘0.08’/%3E%3C/svg%3E”);
+}
+
+.chart-header {
+text-align: center;
+padding: 28px 20px 10px;
+border-bottom: 1px solid var(–parchment-dark);
+}
+
+.chart-header .byline {
+font-family: ‘Source Code Pro’, monospace;
+font-size: 0.65rem;
+color: #7a6040;
+letter-spacing: 0.05em;
+margin-bottom: 6px;
+}
+
+.chart-header h1 {
+font-family: ‘Libre Baskerville’, serif;
+font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+color: var(–ink);
+letter-spacing: -0.01em;
+line-height: 1.15;
+}
+
+.chart-header .subtitle {
+font-style: italic;
+font-size: 0.78rem;
+color: #5a4020;
+margin-top: 4px;
+}
+
+/* Controls */
+.controls {
+display: flex;
+align-items: center;
+justify-content: center;
+flex-wrap: wrap;
+gap: 10px;
+padding: 14px 20px;
+background: var(–parchment-dark);
+border-bottom: 1px solid #d0b880;
+}
+
+.controls label {
+font-family: ‘Source Code Pro’, monospace;
+font-size: 0.68rem;
+letter-spacing: 0.06em;
+text-transform: uppercase;
+color: #5a4020;
+}
+
+.controls input[type=range] {
+-webkit-appearance: none;
+width: 160px;
+height: 4px;
+background: #c0a060;
+border-radius: 2px;
+outline: none;
+}
+.controls input[type=range]::-webkit-slider-thumb {
+-webkit-appearance: none;
+width: 16px; height: 16px;
+border-radius: 50%;
+background: var(–gold);
+cursor: pointer;
+border: 2px solid var(–ink);
+}
+
+.controls .btn-group {
+display: flex;
+gap: 2px;
+}
+
+.controls .ctrl-btn {
+background: var(–ink);
+border: 1px solid var(–gold);
+color: var(–gold-light);
+font-family: ‘Source Code Pro’, monospace;
+font-size: 0.65rem;
+letter-spacing: 0.06em;
+padding: 5px 12px;
+cursor: pointer;
+border-radius: 2px;
+transition: background 0.15s;
+}
+.controls .ctrl-btn:hover {
+background: var(–gold);
+color: var(–ink);
+}
+
+.center-year-display {
+font-family: ‘Libre Baskerville’, serif;
+font-style: italic;
+font-size: 1rem;
+color: var(–ink);
+min-width: 60px;
+text-align: center;
+}
+
+/* Chart scroll wrapper */
+.chart-scroll {
+overflow-x: auto;
+overflow-y: hidden;
+-webkit-overflow-scrolling: touch;
+padding: 0;
+}
+
+/* SVG canvas */
+#cycle-svg {
+display: block;
+font-family: ‘Source Code Pro’, monospace;
+}
+
+/* Legend */
+.legend-bar {
+display: flex;
+flex-wrap: wrap;
+gap: 16px 28px;
+justify-content: center;
+padding: 14px 20px;
+border-top: 1px solid #d0b880;
+background: var(–parchment-dark);
+}
+.legend-item {
+display: flex;
+align-items: center;
+gap: 7px;
+font-size: 0.68rem;
+color: var(–ink-light);
+font-style: italic;
+}
+.legend-swatch {
+width: 28px; height: 3px;
+border-radius: 1px;
+}
+
+/* Tooltip */
+#tooltip {
+position: fixed;
+background: var(–ink);
+color: var(–gold-light);
+font-family: ‘Source Code Pro’, monospace;
+font-size: 0.7rem;
+padding: 8px 12px;
+border: 1px solid var(–gold);
+border-radius: 3px;
+pointer-events: none;
+opacity: 0;
+transition: opacity 0.15s;
+z-index: 200;
+white-space: nowrap;
+max-width: 220px;
+white-space: normal;
+line-height: 1.5;
+}
+
+/* Source note */
+.source-note {
+text-align: center;
+padding: 10px 20px 20px;
+font-family: ‘Source Code Pro’, monospace;
+font-size: 0.6rem;
+color: #8a7040;
+letter-spacing: 0.04em;
+line-height: 1.7;
+}
+
+/* ══════════════════════════════════════
+ABOUT PAGE
+══════════════════════════════════════ */
+#about-page {
+background: var(–bg);
+color: var(–parchment);
+}
+
+.about-container {
+max-width: 740px;
+margin: 0 auto;
+padding: 48px 24px 80px;
+}
+
+.about-container .kicker {
+font-family: ‘Source Code Pro’, monospace;
+font-size: 0.65rem;
+letter-spacing: 0.14em;
+text-transform: uppercase;
+color: var(–gold);
+margin-bottom: 12px;
+}
+
+.about-container h2 {
+font-family: ‘Libre Baskerville’, serif;
+font-size: clamp(1.6rem, 4vw, 2.4rem);
+color: var(–gold-light);
+line-height: 1.15;
+margin-bottom: 28px;
+}
+
+.about-section {
+margin-bottom: 36px;
+}
+
+.about-section h3 {
+font-family: ‘Libre Baskerville’, serif;
+font-style: italic;
+font-size: 1.05rem;
+color: var(–gold);
+border-bottom: 1px solid #3d2b10;
+padding-bottom: 6px;
+margin-bottom: 12px;
+}
+
+.about-section p {
+font-size: 0.88rem;
+line-height: 1.75;
+color: #c8b898;
+margin-bottom: 10px;
+}
+
+.about-section ul {
+list-style: none;
+padding: 0;
+}
+.about-section ul li {
+font-family: ‘Source Code Pro’, monospace;
+font-size: 0.78rem;
+color: #c8b898;
+padding: 6px 0 6px 18px;
+border-bottom: 1px solid #2a1a06;
+position: relative;
+line-height: 1.5;
+}
+.about-section ul li::before {
+content: ‘→’;
+position: absolute;
+left: 0;
+color: var(–gold);
+}
+
+.row-badge {
+display: inline-block;
+font-family: ‘Source Code Pro’, monospace;
+font-size: 0.7rem;
+font-weight: 600;
+padding: 2px 8px;
+border-radius: 2px;
+margin-right: 6px;
+letter-spacing: 0.06em;
+}
+.badge-a { background: rgba(139,26,26,0.25); color: #e06060; border: 1px solid #8b1a1a; }
+.badge-b { background: rgba(26,46,92,0.25); color: #6090e0; border: 1px solid #1a2e5c; }
+.badge-c { background: rgba(26,92,42,0.25); color: #60c080; border: 1px solid #1a5c2a; }
+
+.disclaimer {
+margin-top: 40px;
+padding: 16px 20px;
+border: 1px solid #3d2b10;
+border-left: 3px solid var(–gold);
+background: rgba(200,144,26,0.05);
+font-size: 0.72rem;
+color: #8a7040;
+line-height: 1.65;
+font-family: ‘Source Code Pro’, monospace;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+#nav .logo { font-size: 0.85rem; }
+#nav button { font-size: 0.62rem; padding: 5px 10px; }
+.controls { gap: 8px; }
+.controls input[type=range] { width: 110px; }
+}
+</style>
+
+</head>
+<body>
+
+<!-- NAV -->
+
+<nav id="nav">
+  <span class="logo">George's Cycle</span>
+  <div class="nav-links">
+    <button class="active" onclick="showPage('chart')">Chart</button>
+    <button onclick="showPage('about')">About</button>
+  </div>
+</nav>
+
+<!-- TOOLTIP -->
+
+<div id="tooltip"></div>
+
+<!-- ══ CHART PAGE ══ -->
+
+<div id="chart-page" class="page active">
+
+  <div class="chart-header">
+    <div class="byline">Compiled 1872 · Copyright 1883 &amp; 1997 · George Tritcht / Henry George</div>
+    <h1>Periods When to Make Money</h1>
+    <div class="subtitle">"A" = Panics &nbsp;·&nbsp; "B" = Good Times, sell &nbsp;·&nbsp; "C" = Hard Times, buy</div>
+  </div>
+
+  <div class="controls">
+    <label>Center year:</label>
+    <button class="ctrl-btn" onclick="shiftCenter(-5)">−5</button>
+    <button class="ctrl-btn" onclick="shiftCenter(-1)">−1</button>
+    <span class="center-year-display" id="center-display">2026</span>
+    <button class="ctrl-btn" onclick="shiftCenter(+1)">+1</button>
+    <button class="ctrl-btn" onclick="shiftCenter(+5)">+5</button>
+    <button class="ctrl-btn" onclick="resetCenter()" style="margin-left:8px">Reset</button>
+    <div style="display:flex;align-items:center;gap:8px;margin-left:8px">
+      <label>Range ±</label>
+      <input type="range" id="range-slider" min="5" max="30" value="10" oninput="updateRange(this.value)">
+      <span id="range-display" style="font-family:'Source Code Pro',monospace;font-size:0.7rem;color:#5a4020;min-width:40px">±10 yr</span>
+    </div>
+  </div>
+
+  <div class="chart-scroll" id="chart-scroll">
+    <svg id="cycle-svg"></svg>
+  </div>
+
+  <div class="legend-bar">
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:#8b1a1a;height:2px;border-top:2px dashed #8b1a1a;background:none"></div>
+      Row A — Panic years (top)
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:#1a2e5c"></div>
+      Row B — Good times, sell (mid)
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:#1a5c2a"></div>
+      Row C — Hard times, buy (bottom)
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:var(--now-color);width:2px;height:14px;border-radius:0"></div>
+      Current year
+    </div>
+  </div>
+
+  <div class="source-note">
+    "Sure thing" — "Save this card and watch it closely"<br>
+    Based on Henry George's 18-year land/real-estate cycle. Edited by Mio Galessio.<br>
+    This tool is for educational purposes only. Not financial advice.
+  </div>
+</div>
+
+<!-- ══ ABOUT PAGE ══ -->
+
+<div id="about-page" class="page">
+  <div class="about-container">
+    <div class="kicker">About this tool</div>
+    <h2>George's Cycle — Interactive Chart</h2>
+
+```
+<div class="about-section">
+  <h3>What is this?</h3>
+  <p>This is an interactive visualization of the <strong>18-year real estate and economic cycle</strong> first described by <strong>Henry George</strong> (1839–1897) in his landmark work <em>Progress and Poverty</em> (1879), and later popularized by Fred Harrison and others.</p>
+  <p>The original card — "Periods When to Make Money" — was compiled in 1872, copyrighted 1883, and shows three rows (A, B, C) of repeating cycle years spanning from 1780 to 2059.</p>
+</div>
+
+<div class="about-section">
+  <h3>The Three Rows Explained</h3>
+  <ul>
+    <li><span class="row-badge badge-a">A</span> <strong>Panic Years</strong> — Years in which panics have occurred and will occur again. These mark the top of the cycle, where credit collapses, real estate crashes, and financial crises peak. Approximately every 18–20 years.</li>
+    <li><span class="row-badge badge-b">B</span> <strong>Good Times / Sell</strong> — "Years of Good Times, High prices and the time to sell stocks and values of all kinds." These are the boom years of the cycle — high land prices, credit expansion, euphoria. The right time to reduce exposure.</li>
+    <li><span class="row-badge badge-c">C</span> <strong>Hard Times / Buy</strong> — "Years of Hard Times, Low Prices and a Good time to buy stocks, 'Corner lots', goods, etc. And hold till the 'boom' reaches the years of good times, then unload." These are the trough years — the best buying opportunities.</li>
+  </ul>
+</div>
+
+<div class="about-section">
+  <h3>How the Cycle Works</h3>
+  <p>The cycle is driven primarily by <strong>land speculation</strong>. As economies grow, land values rise faster than wages or productive output. Speculators borrow against land, prices become untethered from reality, credit tightens, and a crash follows — roughly every 18 years.</p>
+  <p>Historical panic years that match the model: <strong>1819, 1837, 1857, 1873, 1893, 1907, 1929, 1945*, 1973, 1989, 2008</strong> (* modified by WWII). The next predicted peak zone: <strong>~2026–2028</strong>, with a recession trough around <strong>2033–2035</strong>.</p>
+</div>
+
+<div class="about-section">
+  <h3>How to Use This Tool</h3>
+  <ul>
+    <li>The chart always opens centered on the <strong>current year</strong>, showing ±10 years by default.</li>
+    <li>Use the <strong>−1 / +1 / −5 / +5</strong> buttons to scroll the center year backward or forward in time.</li>
+    <li>Use the <strong>Range ±</strong> slider to zoom out (show more years) or zoom in (show fewer).</li>
+    <li>Hover or tap any point on the chart to see details about that year and its phase.</li>
+    <li>The <strong>golden vertical line</strong> always marks the current real-world year.</li>
+    <li>Press <strong>Reset</strong> to return to the current year, centered.</li>
+  </ul>
+</div>
+
+<div class="about-section">
+  <h3>The Zigzag / Tooth Pattern</h3>
+  <p>The distinctive triangular "tooth" pattern in the original card represents the oscillation between the three cycle phases. Each tooth corresponds to roughly one full cycle (~18 years). The peaks of Row B (good times) align with the nadirs of Row A (panics), and the valleys of Row C (buy opportunities) fall between.</p>
+  <p>The numbers between the teeth (8, 9, 10 etc.) represent the approximate number of years between each named event year.</p>
+</div>
+
+<div class="about-section">
+  <h3>Technical Notes</h3>
+  <ul>
+    <li>Single-file HTML — no frameworks, no dependencies, no internet required after load.</li>
+    <li>Fully responsive — works on phones, tablets, and desktop screens.</li>
+    <li>All cycle data is algorithmically generated from the George/Harrison model constants.</li>
+    <li>The chart re-renders dynamically when you change the center year or range.</li>
+    <li>No cookies, no tracking, no data collection of any kind.</li>
+  </ul>
+</div>
+
+<div class="disclaimer">
+  ⚠ DISCLAIMER — This tool is for educational and historical research purposes only. The George cycle is a theoretical model based on historical patterns. It does not guarantee future outcomes. Past cycles have been altered by wars, pandemics, and policy changes. Nothing on this page constitutes financial, investment, or legal advice.
+</div>
+```
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// GEORGE'S CYCLE DATA ENGINE
+// ═══════════════════════════════════════════════════
+
+// The original card encodes the cycle starting from 1780.
+// Key anchor: A-row panics at 1783, 1803, 1819, 1837, 1857, 1873, 1891, 1911, 1927, 1945, 1965, 1981, 1999, 2019, 2035, 2053
+// Gaps between A years: 20, 16, 18, 20, 16, 18, 20, 16, 18, 20, 16, 18, 20, 16, 18...
+// Pattern: alternating 20, 16, 18 (repeating group of 3 = 54 years for 3 cycles)
+// Average: 18 years
+
+const A_START = 1783;
+const A_GAPS = [20, 16, 18]; // repeating pattern
+
+// B row years (good times/sell) — from original card
+// 1783, 1791, 1800, 1810, 1818, 1827, 1837, 1845, 1854, 1864, 1872, 1881, 1891, 1899, 1908, 1918, 1926, 1935, 1945, 1953, 1962, 1972, 1980, 1989, 1999, 2007, 2016, 2026, 2034, 2043, 2053
+// Inter-B gaps from card: 8,9,10,8,9,10,8,9,10,8,9,10,8,9,10,8,9,10,8,9,10,8,9,10,8,9,10,8,9,10
+const B_START = 1783;
+const B_GAPS_PATTERN = [8, 9, 10]; // repeating
+
+// C row years (hard times/buy) — from original card
+// 1780, 1789, 1796, 1807, 1816, 1823, 1834, 1843, 1850, 1861, 1870, 1877, 1888, 1897, 1904, 1915, 1924, 1931, 1942, 1951, 1958, 1969, 1978, 1985, 1996, 2005, 2012, 2023, 2032, 2039, 2050, 2059
+// Inter-C sub-gaps from card: 3,6,2,5,4,7,3,6,2,5,4,7,3,6,2,5,4,7,3,6,2,5,4,7,3,6,2,5,4,7,3,6,2,5,4,7
+const C_START = 1780;
+const C_GAPS_PATTERN = [3, 6, 2, 5, 4, 7];
+
+// Generate series up to year range
+function generateSeries(start, gapPattern, maxYear, minYear) {
+  const years = [start];
+  let i = 0;
+  let y = start;
+  // also go backward
+  let backward = [start];
+  let bi = 0;
+  let by = start;
+  while (by > minYear - 30) {
+    bi = ((bi - 1) % gapPattern.length + gapPattern.length) % gapPattern.length;
+    by -= gapPattern[bi];
+    backward.unshift(by);
+  }
+  while (y < maxYear + 30) {
+    y += gapPattern[i % gapPattern.length];
+    i++;
+    years.push(y);
+  }
+  // merge
+  const all = [...new Set([...backward, ...years])].sort((a,b)=>a-b);
+  return all;
+}
+
+function getAYears(min, max) { return generateSeries(A_START, A_GAPS, max, min); }
+function getBYears(min, max) { return generateSeries(B_START, B_GAPS_PATTERN, max, min); }
+function getCYears(min, max) { return generateSeries(C_START, C_GAPS_PATTERN, max, min); }
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+const NOW = new Date().getFullYear();
+let centerYear = NOW;
+let rangeYears = 10;
+
+// ═══════════════════════════════════════════════════
+// RENDER ENGINE
+// ═══════════════════════════════════════════════════
+function render() {
+  const svg = document.getElementById('cycle-svg');
+  const scroll = document.getElementById('chart-scroll');
+  const W_container = scroll.clientWidth || window.innerWidth;
+
+  const minYear = centerYear - rangeYears;
+  const maxYear = centerYear + rangeYears;
+  const totalYears = maxYear - minYear;
+
+  // Sizing
+  const PX_PER_YEAR = Math.max(28, Math.min(60, W_container / totalYears));
+  const SVG_W = Math.max(W_container, totalYears * PX_PER_YEAR + 80);
+  const MARGIN_L = 56;
+  const MARGIN_R = 40;
+  const CHART_W = SVG_W - MARGIN_L - MARGIN_R;
+  const SVG_H = 480;
+
+  // Row Y centers
+  const ROW_H = 120;
+  const ROW_A_Y = 80;   // top
+  const ROW_B_Y = 230;  // mid
+  const ROW_C_Y = 385;  // bottom
+  const TOOTH_H = 60;   // half-height of teeth
+
+  function xOf(year) {
+    return MARGIN_L + ((year - minYear) / totalYears) * CHART_W;
+  }
+
+  // Get data
+  const aYears = getAYears(minYear, maxYear);
+  const bYears = getBYears(minYear, maxYear);
+  const cYears = getCYears(minYear, maxYear);
+
+  // Filter to visible range (with small overflow for clipping)
+  const pad = 3;
+  const aVis = aYears.filter(y => y >= minYear - pad && y <= maxYear + pad);
+  const bVis = bYears.filter(y => y >= minYear - pad && y <= maxYear + pad);
+  const cVis = cYears.filter(y => y >= minYear - pad && y <= maxYear + pad);
+
+  // SVG dims
+  svg.setAttribute('width', SVG_W);
+  svg.setAttribute('height', SVG_H);
+  svg.setAttribute('viewBox', `0 0 ${SVG_W} ${SVG_H}`);
+
+  // ── Build SVG string ──
+  let s = '';
+
+  // Defs
+  s += `<defs>
+    <clipPath id="chartClip">
+      <rect x="${MARGIN_L}" y="0" width="${CHART_W}" height="${SVG_H}"/>
+    </clipPath>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="parchTex" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="4" fill="#f0e0b0" opacity="0.3"/>
+    </pattern>
+  </defs>`;
+
+  // Background
+  s += `<rect width="${SVG_W}" height="${SVG_H}" fill="#f5ead0"/>`;
+
+  // Row backgrounds
+  s += `<rect x="${MARGIN_L}" y="${ROW_A_Y - TOOTH_H - 20}" width="${CHART_W}" height="${TOOTH_H * 2 + 40}" fill="rgba(139,26,26,0.06)" clip-path="url(#chartClip)"/>`;
+  s += `<rect x="${MARGIN_L}" y="${ROW_B_Y - TOOTH_H - 20}" width="${CHART_W}" height="${TOOTH_H * 2 + 40}" fill="rgba(26,46,92,0.05)" clip-path="url(#chartClip)"/>`;
+  s += `<rect x="${MARGIN_L}" y="${ROW_C_Y - TOOTH_H - 20}" width="${CHART_W}" height="${TOOTH_H * 2 + 40}" fill="rgba(26,92,42,0.05)" clip-path="url(#chartClip)"/>`;
+
+  // Row separators
+  s += `<line x1="${MARGIN_L}" y1="${(ROW_A_Y + ROW_B_Y)/2}" x2="${MARGIN_L + CHART_W}" y2="${(ROW_A_Y + ROW_B_Y)/2}" stroke="#d0b880" stroke-width="0.5" stroke-dasharray="4,6"/>`;
+  s += `<line x1="${MARGIN_L}" y1="${(ROW_B_Y + ROW_C_Y)/2}" x2="${MARGIN_L + CHART_W}" y2="${(ROW_B_Y + ROW_C_Y)/2}" stroke="#d0b880" stroke-width="0.5" stroke-dasharray="4,6"/>`;
+
+  // Row labels (left)
+  s += `<text x="${MARGIN_L - 8}" y="${ROW_A_Y + 5}" text-anchor="end" font-family="'Libre Baskerville',serif" font-style="italic" font-weight="700" font-size="15" fill="#8b1a1a" opacity="0.9">"A"</text>`;
+  s += `<text x="${MARGIN_L - 8}" y="${ROW_B_Y + 5}" text-anchor="end" font-family="'Libre Baskerville',serif" font-style="italic" font-weight="700" font-size="15" fill="#1a2e5c" opacity="0.9">"B"</text>`;
+  s += `<text x="${MARGIN_L - 8}" y="${ROW_C_Y + 5}" text-anchor="end" font-family="'Libre Baskerville',serif" font-style="italic" font-weight="700" font-size="15" fill="#1a5c2a" opacity="0.9">"C"</text>`;
+
+  // ── TOOTH ZIGZAG LINES ──
+  // Row A: zigzag between aYears peaks (at ROW_A_Y - TOOTH_H) and valleys (ROW_A_Y + TOOTH_H)
+  // Row B: same idea
+  // Row C: same idea
+
+  function makeZigzag(years, cy, th, color) {
+    if (years.length < 2) return '';
+    let pts = [];
+    for (let i = 0; i < years.length; i++) {
+      const x = xOf(years[i]);
+      const y = (i % 2 === 0) ? cy - th : cy + th;
+      pts.push(`${x},${y}`);
+    }
+    return `<polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="miter" clip-path="url(#chartClip)" opacity="0.85"/>`;
+  }
+
+  // For Row A — use dashed line (panics)
+  function makeZigzagA(years, cy, th) {
+    if (years.length < 2) return '';
+    let d = '';
+    for (let i = 0; i < years.length; i++) {
+      const x = xOf(years[i]);
+      const y = (i % 2 === 0) ? cy - th : cy + th;
+      d += (i === 0 ? 'M' : 'L') + `${x} ${y} `;
+    }
+    return `<path d="${d}" fill="none" stroke="#8b1a1a" stroke-width="1.8" stroke-dasharray="5,3" stroke-linejoin="miter" clip-path="url(#chartClip)" opacity="0.8"/>`;
+  }
+
+  s += makeZigzagA(aVis, ROW_A_Y, TOOTH_H);
+  s += makeZigzag(bVis, ROW_B_Y, TOOTH_H, '#1a2e5c');
+  s += makeZigzag(cVis, ROW_C_Y, TOOTH_H, '#1a5c2a');
+
+  // ── FILL AREAS under zigzag ──
+  function makeFill(years, cy, th, color, flip=false) {
+    if (years.length < 2) return '';
+    let pts = [];
+    for (let i = 0; i < years.length; i++) {
+      const x = xOf(years[i]);
+      const y = (i % 2 === 0) ? cy - th : cy + th;
+      pts.push([x, y]);
+    }
+    // Build polygon: zigzag top + baseline bottom
+    let d = `M ${pts[0][0]} ${pts[0][1]} `;
+    for (let i = 1; i < pts.length; i++) d += `L ${pts[i][0]} ${pts[i][1]} `;
+    d += `L ${pts[pts.length-1][0]} ${cy} L ${pts[0][0]} ${cy} Z`;
+    return `<path d="${d}" fill="${color}" opacity="0.08" clip-path="url(#chartClip)"/>`;
+  }
+
+  s += makeFill(aVis, ROW_A_Y, TOOTH_H, '#8b1a1a');
+  s += makeFill(bVis, ROW_B_Y, TOOTH_H, '#1a2e5c');
+  s += makeFill(cVis, ROW_C_Y, TOOTH_H, '#1a5c2a');
+
+  // ── YEAR DOTS + LABELS ──
+  function makeDots(years, cy, th, color, rowLabel, phase, advice) {
+    let out = '';
+    for (let i = 0; i < years.length; i++) {
+      const yr = years[i];
+      if (yr < minYear - 1 || yr > maxYear + 1) continue;
+      const x = xOf(yr);
+      const isPeak = (i % 2 === 0);
+      const y = isPeak ? cy - th : cy + th;
+      const isNow = (yr === NOW);
+
+      // Vertical tick from center
+      out += `<line x1="${x}" y1="${cy}" x2="${x}" y2="${y}" stroke="${color}" stroke-width="0.5" opacity="0.3"/>`;
+
+      // Dot
+      const r = isNow ? 7 : 5;
+      out += `<circle cx="${x}" cy="${y}" r="${r}" fill="${isNow ? '#c8901a' : color}" stroke="${isNow ? '#1a1008' : '#f5ead0'}" stroke-width="${isNow ? 2.5 : 1.5}"
+        style="cursor:pointer"
+        data-year="${yr}" data-row="${rowLabel}" data-phase="${phase}" data-advice="${advice}"
+        class="cycle-dot"
+        ${isNow ? 'filter="url(#glow)"' : ''}/>`;
+
+      // Year label
+      const labelY = isPeak ? y - 10 : y + 18;
+      const fontSize = (PX_PER_YEAR < 35) ? 8 : 10;
+      out += `<text x="${x}" y="${labelY}" text-anchor="middle" font-family="'Source Code Pro',monospace" font-size="${fontSize}" fill="${isNow ? '#c8901a' : color}" font-weight="${isNow ? '600':'400'}">${yr}</text>`;
+
+      // Gap label between consecutive dots (if space)
+      if (i > 0) {
+        const prevY = years[i-1];
+        const gap = yr - prevY;
+        const mx = (xOf(prevY) + x) / 2;
+        const my = cy + (isPeak ? 8 : -5);
+        if (PX_PER_YEAR >= 32) {
+          out += `<text x="${mx}" y="${my}" text-anchor="middle" font-family="'Source Code Pro',monospace" font-size="8" fill="${color}" opacity="0.5">${gap}</text>`;
+        }
+      }
+    }
+    return out;
+  }
+
+  s += makeDots(aVis, ROW_A_Y, TOOTH_H, '#8b1a1a', 'A', 'Panic Year', 'Time to be cautious. Historic crash zone. Reduce exposure.');
+  s += makeDots(bVis, ROW_B_Y, TOOTH_H, '#1a2e5c', 'B', 'Good Times / Sell', 'High prices, sell stocks and real estate. Boom peak approaching.');
+  s += makeDots(cVis, ROW_C_Y, TOOTH_H, '#1a5c2a', 'C', 'Hard Times / Buy', 'Low prices. Best time to buy land, stocks, goods. Hold for the boom.');
+
+  // ── CENTER LINES ──
+  s += `<line x1="${MARGIN_L}" y1="${ROW_A_Y}" x2="${MARGIN_L + CHART_W}" y2="${ROW_A_Y}" stroke="#8b1a1a" stroke-width="0.7" stroke-dasharray="2,4" opacity="0.3"/>`;
+  s += `<line x1="${MARGIN_L}" y1="${ROW_B_Y}" x2="${MARGIN_L + CHART_W}" y2="${ROW_B_Y}" stroke="#1a2e5c" stroke-width="0.7" stroke-dasharray="2,4" opacity="0.3"/>`;
+  s += `<line x1="${MARGIN_L}" y1="${ROW_C_Y}" x2="${MARGIN_L + CHART_W}" y2="${ROW_C_Y}" stroke="#1a5c2a" stroke-width="0.7" stroke-dasharray="2,4" opacity="0.3"/>`;
+
+  // ── NOW LINE ──
+  const nowX = xOf(NOW);
+  if (nowX >= MARGIN_L && nowX <= MARGIN_L + CHART_W) {
+    s += `<line x1="${nowX}" y1="20" x2="${nowX}" y2="${SVG_H - 20}" stroke="#c8901a" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.8"/>`;
+    s += `<text x="${nowX}" y="15" text-anchor="middle" font-family="'Source Code Pro',monospace" font-size="9" fill="#c8901a" font-weight="600">NOW ${NOW}</text>`;
+  }
+
+  // ── X AXIS (year ticks every n years) ──
+  // Determine tick interval
+  const tickInterval = totalYears <= 12 ? 1 : totalYears <= 25 ? 2 : totalYears <= 40 ? 5 : 10;
+  const tickStart = Math.ceil(minYear / tickInterval) * tickInterval;
+  for (let y = tickStart; y <= maxYear; y += tickInterval) {
+    const x = xOf(y);
+    if (x < MARGIN_L || x > MARGIN_L + CHART_W) continue;
+    s += `<line x1="${x}" y1="${SVG_H - 30}" x2="${x}" y2="${SVG_H - 22}" stroke="#a08040" stroke-width="1"/>`;
+    s += `<text x="${x}" y="${SVG_H - 10}" text-anchor="middle" font-family="'Source Code Pro',monospace" font-size="9" fill="#7a6040">${y}</text>`;
+  }
+
+  // Axis line
+  s += `<line x1="${MARGIN_L}" y1="${SVG_H - 30}" x2="${MARGIN_L + CHART_W}" y2="${SVG_H - 30}" stroke="#a08040" stroke-width="1"/>`;
+
+  svg.innerHTML = s;
+
+  // ── TOOLTIP EVENTS ──
+  svg.querySelectorAll('.cycle-dot').forEach(dot => {
+    dot.addEventListener('mouseenter', e => showTip(e, dot));
+    dot.addEventListener('mouseleave', hideTip);
+    dot.addEventListener('touchstart', e => { e.preventDefault(); showTip(e.touches[0], dot); }, {passive:false});
+    dot.addEventListener('touchend', hideTip);
+  });
+}
+
+function showTip(e, dot) {
+  const tip = document.getElementById('tooltip');
+  const yr = dot.getAttribute('data-year');
+  const row = dot.getAttribute('data-row');
+  const phase = dot.getAttribute('data-phase');
+  const advice = dot.getAttribute('data-advice');
+  tip.innerHTML = `<strong style="color:#e8c97a">Row "${row}" · ${yr}</strong><br><em>${phase}</em><br><span style="color:#a09070">${advice}</span>`;
+  tip.style.opacity = '1';
+  moveTip(e);
+}
+
+function moveTip(e) {
+  const tip = document.getElementById('tooltip');
+  const x = e.clientX || e.pageX;
+  const y = e.clientY || e.pageY;
+  tip.style.left = Math.min(x + 14, window.innerWidth - 240) + 'px';
+  tip.style.top = (y - 60) + 'px';
+}
+
+function hideTip() {
+  document.getElementById('tooltip').style.opacity = '0';
+}
+
+document.addEventListener('mousemove', e => {
+  if (document.getElementById('tooltip').style.opacity === '1') moveTip(e);
+});
+
+// ═══════════════════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════════════════
+function updateCenterDisplay() {
+  document.getElementById('center-display').textContent = centerYear;
+}
+
+function shiftCenter(delta) {
+  centerYear += delta;
+  updateCenterDisplay();
+  render();
+}
+
+function resetCenter() {
+  centerYear = NOW;
+  rangeYears = 10;
+  document.getElementById('range-slider').value = 10;
+  document.getElementById('range-display').textContent = '±10 yr';
+  updateCenterDisplay();
+  render();
+}
+
+function updateRange(val) {
+  rangeYears = parseInt(val);
+  document.getElementById('range-display').textContent = `±${rangeYears} yr`;
+  render();
+}
+
+// ═══════════════════════════════════════════════════
+// PAGE SWITCHING
+// ═══════════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(name + '-page').classList.add('active');
+  const btns = document.querySelectorAll('#nav button');
+  btns.forEach(b => { if(b.textContent.toLowerCase().includes(name.slice(0,3))) b.classList.add('active'); });
+  if (name === 'chart') render();
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  updateCenterDisplay();
+  render();
+  window.addEventListener('resize', () => { if (document.getElementById('chart-page').classList.contains('active')) render(); });
+});
+</script>
+
+</body>
+</html>
